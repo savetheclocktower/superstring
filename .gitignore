@@ -10,3 +10,4 @@ package-lock.json
 
 vendor/libiconv
 .vscode
+/bin/
