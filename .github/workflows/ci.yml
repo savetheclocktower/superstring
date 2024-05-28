@@ -61,8 +61,11 @@ jobs:
           source CI_venv/bin/activate
           python3 -m pip install setuptools
 
-      - name: Uninstall Homebrew libiconv
-        run: brew uninstall libiconv
+      - name: Find iconv headers
+        run: find / -name iconv.*
+
+      - name: Find libiconv headers
+        run: find / -name libiconv.*
 
       - name: Install dependencies
         run: |
