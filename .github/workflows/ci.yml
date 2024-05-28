@@ -63,9 +63,11 @@ jobs:
 
       - name: Find iconv headers
         run: find / -name iconv.*
+        continue-on-error: true
 
       - name: Find libiconv headers
         run: find / -name libiconv.*
+        continue-on-error: true
 
       - name: Install dependencies
         run: |
