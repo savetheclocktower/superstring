@@ -64,8 +64,6 @@ jobs:
       - name: Install dependencies
         run: |
           source CI_venv/bin/activate
-          # Workaround to find the intended libiconv headers, not Homebrew's copy (I think?)
-          export CPPFLAGS="-I/usr/local/opt/libiconv/include"
           npm install
 
       - name: Lint
