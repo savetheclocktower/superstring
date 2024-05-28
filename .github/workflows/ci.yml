@@ -27,20 +27,36 @@ jobs:
     name: Node ${{ matrix.node_version }} on ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
-            'node_modules'
+            node_modules
           key: ${{ runner.os }}-${{ matrix.node_version }}-${{ hashFiles('package.json') }}
 
       - name: Setup node
-        uses: actions/setup-node@v2-beta
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node_version }}
+
+      - name: Setup python
+        if: matrix.node_version == 14
+        # Old versions of Node bundle old versions of npm.
+        # Old versions of npm bundle old versions of node-gyp.
+        # Old versions of node-gyp are incompatible with Python 3.11+.
+        # Install older Python (Python 3.10) as a workaround.
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Python setuptools
+        # This is needed for Python 3.12+, since many versions of node-gyp
+        # are incompatible with Python 3.12+, which no-longer ships 'distutils'
+        # out of the box. 'setuptools' package provides 'distutils'.
+        run: python3 -m pip install setuptools
 
       - name: Install dependencies
         run: npm install
