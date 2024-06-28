@@ -119,6 +119,7 @@
                 "xcode_settings": {
                     'CLANG_CXX_LIBRARY': 'libc++',
                     'CLANG_CXX_LANGUAGE_STANDARD':'c++11',
+                    'OTHER_LDFLAGS': ['-L/usr/local/opt/libiconv/lib'],
                 }
             }],
             ['OS=="win"', {
