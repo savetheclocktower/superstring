@@ -47,7 +47,7 @@
             "conditions": [
                 ['OS=="mac"', {
                     'link_settings': {
-                        'libraries': ['libiconv.dylib'],
+                        'libraries': ['/usr/local/opt/libiconv/lib/libiconv.dylib'],
                     }
                 }],
                 ['OS=="win"', {
