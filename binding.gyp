@@ -46,9 +46,9 @@
             ],
             "conditions": [
                 ['OS=="mac"', {
-                    'link_settings': {
-                        'libraries': ['libiconv.dylib'],
-                    }
+                    "include_dirs+": [
+                        "<!(script/find-libiconv-include.sh)"
+                    ]
                 }],
                 ['OS=="win"', {
                    'sources': [
