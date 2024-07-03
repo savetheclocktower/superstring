@@ -3,6 +3,10 @@
 
 Native library at the core of Atom's text editor.
 
+## Installation notes:
+
+On macOS 13 and greater, the OS no longer offers GNU `libiconv`. We handle this by downloading it from Apple’s OSS GitHub page and building it as a pre-compilation step.
+
 ## Components:
 
 ### Patch

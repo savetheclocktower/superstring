@@ -8,6 +8,10 @@
 !src/bindings/*.h
 !src/bindings/*.cc
 
+!script/fetch-libiconv-61.sh
+!script/find-gnu-libiconv.sh
+!script/adjust-install-name.sh
+
 !vendor/libcxx/*
 
 !vendor/pcre/pcre.gyp
