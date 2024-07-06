@@ -21,12 +21,40 @@
               "src/core",
               "<!(node -e \"require('nan')\")"
             ],
+            "conditions": [
+                ['OS=="mac"', {
+                    "postbuilds": [
+                        {
+                            'postbuild_name': 'Adjust vendored libiconv install name',
+                            'action': [
+                                'install_name_tool',
+                                "-change",
+                                "libiconv.2.dylib",
+                                "@loader_path/../../ext/lib/libiconv.2.dylib",
+                                "<(PRODUCT_DIR)/superstring.node"
+                            ]
+
+                            # NOTE: This version of the post-build action
+                            # should be used if we find it necessary to avoid
+                            # changing the `dylib`’s install name in an earlier
+                            # step.
+                            #
+                            # 'action': [
+                            #     'bash',
+                            #     '<(module_root_dir)/script/adjust-install-name.sh',
+                            #     '<(PRODUCT_DIR)'
+                            # ]
+
+                        }
+                    ]
+                }]
+            ]
         },
         {
             "target_name": "superstring_core",
             "type": "static_library",
             "dependencies": [
-                "./vendor/pcre/pcre.gyp:pcre",
+                "./vendor/pcre/pcre.gyp:pcre"
             ],
             "sources": [
                 "src/core/encoding-conversion.cc",
@@ -46,8 +74,14 @@
             ],
             "conditions": [
                 ['OS=="mac"', {
+                    'dependencies': [
+                        'build_libiconv'
+                    ],
+                    'include_dirs': [
+                        '<(module_root_dir)/ext/include'
+                    ],
                     'link_settings': {
-                        'libraries': ['libiconv.dylib'],
+                        'libraries': ['<(module_root_dir)/ext/lib/libiconv.2.dylib']
                     }
                 }],
                 ['OS=="win"', {
@@ -71,6 +105,43 @@
     },
 
     "conditions": [
+        ['OS=="mac"', {
+            'targets+': [
+                {
+                    "target_name": "build_libiconv",
+                    "target_type": "none",
+                    "actions": [
+                        {
+                            "action_name": "Run script",
+                            "message": "Building GNU libiconv...",
+                            "inputs": [],
+                            "outputs": ["ext"],
+                            "action": [
+                                "bash",
+                                "script/fetch-libiconv-61.sh"
+                            ]
+                        }
+                    ]
+                }
+                # {
+                #     "target_name": "find_libiconv",
+                #     "target_type": "none",
+                #     "actions": [
+                #         {
+                #             "action_name": "Run script",
+                #             "message": "Locating GNU libiconv...",
+                #             "inputs": [],
+                #             "outputs": ["vendor/libiconv/lib/libiconv.2.dylib"],
+                #             "action": [
+                #                 "bash",
+                #                 "script/find-gnu-libiconv.sh"
+                #             ]
+                #         }
+                #     ]
+                # }
+            ]
+        }],
+
         # If --tests is passed to node-gyp configure, we'll build a standalone
         # executable that runs tests on the patch.
         ['tests != 0', {

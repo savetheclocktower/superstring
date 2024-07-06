@@ -21,8 +21,12 @@ jobs:
         exclude:
           - os: windows-latest
             node_version: 14
+          - os: macos-latest
+            node_version: 14
         include:
           - os: windows-2019
+            node_version: 14
+          - os: macos-13
             node_version: 14
     name: Node ${{ matrix.node_version }} on ${{ matrix.os }}
 
@@ -52,14 +56,37 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Python setuptools
+      - name: Install Python setuptools (Unix-likes)
         # This is needed for Python 3.12+, since many versions of node-gyp
         # are incompatible with Python 3.12+, which no-longer ships 'distutils'
         # out of the box. 'setuptools' package provides 'distutils'.
-        run: python3 -m pip install setuptools
+        if: ${{ runner.os != 'Windows' }}
+        run: |
+          python3 -m venv CI_venv
+          source CI_venv/bin/activate
+          python3 -m pip install setuptools
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install Python setuptools (Windows)
+        # This is needed for Python 3.12+, since many versions of node-gyp
+        # are incompatible with Python 3.12+, which no-longer ships 'distutils'
+        # out of the box. 'setuptools' package provides 'distutils'.
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          python3 -m venv CI_venv
+          CI_venv\Scripts\activate.bat
+          python3 -m pip install setuptools
+
+      - name: Install dependencies (Unix-likes)
+        if: ${{ runner.os != 'Windows' }}
+        run: |
+          source CI_venv/bin/activate
+          npm install
+
+      - name: Install dependencies (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          CI_venv\Scripts\activate.bat
+          npm install
 
       - name: Lint
         run: npm run standard

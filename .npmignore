@@ -8,6 +8,8 @@
 !src/bindings/*.h
 !src/bindings/*.cc
 
+!script/fetch-libiconv-61.sh
+
 !vendor/libcxx/*
 
 !vendor/pcre/pcre.gyp
