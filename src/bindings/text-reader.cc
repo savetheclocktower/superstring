@@ -1,3 +1,4 @@
+#include "addon-data.h"
 #include "text-slice.h"
 #include "text-reader.h"
 #include "encoding-conversion.h"
@@ -7,17 +8,16 @@ using std::move;
 using std::string;
 using namespace Napi;
 
-FunctionReference TextReader::constructor;
+void TextReader::init(Napi::Env env, Object exports) {
+  auto *data = env.GetInstanceData<AddonData>();
 
-void TextReader::init(Object exports) {
-  auto env = exports.Env();
   Napi::Function func = DefineClass(env, "TextReader", {
     InstanceMethod<&TextReader::read>("read"),
     InstanceMethod<&TextReader::end>("end"),
     InstanceMethod<&TextReader::destroy>("destroy"),
   });
 
-  TextReader::constructor.Reset(func, 1);
+  data->text_reader_constructor = Napi::Persistent(func);
   exports.Set("TextReader", func);
 }
 

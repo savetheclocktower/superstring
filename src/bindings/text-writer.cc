@@ -1,3 +1,4 @@
+#include "addon-data.h"
 #include "text-writer.h"
 
 using std::string;
@@ -5,16 +6,15 @@ using std::move;
 using std::u16string;
 using namespace Napi;
 
-FunctionReference TextWriter::constructor;
+void TextWriter::init(Napi::Env env, Object exports) {
+  auto *data = env.GetInstanceData<AddonData>();
 
-void TextWriter::init(Object exports) {
-  auto env = exports.Env();
   Napi::Function func = DefineClass(env, "TextWriter", {
     InstanceMethod<&TextWriter::write>("write"),
     InstanceMethod<&TextWriter::end>("end"),
   });
 
-  constructor.Reset(func, 1);
+  data->text_writer_constructor = Napi::Persistent(func);
   exports.Set("TextWriter", func);
 }
 

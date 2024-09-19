@@ -20,7 +20,7 @@ public:
     return &slices_;
   }
 
-  TextBufferSnapshotWrapper(const Napi::CallbackInfo &info);
+  explicit TextBufferSnapshotWrapper(const Napi::CallbackInfo &info);
   ~TextBufferSnapshotWrapper();
 
 private:
@@ -29,7 +29,6 @@ private:
   Napi::ObjectReference js_text_buffer;
   TextBuffer::Snapshot *snapshot;
   std::vector<std::pair<const char16_t *, uint32_t>> slices_;
-  static Napi::FunctionReference constructor;
 };
 
 #endif // SUPERSTRING_TEXT_BUFFER_SNAPSHOT_WRAPPER_H

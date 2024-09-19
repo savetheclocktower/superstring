@@ -1,3 +1,4 @@
+#include "addon-data.h"
 #include "marker-index-wrapper.h"
 #include "patch-wrapper.h"
 #include "range-wrapper.h"
@@ -9,11 +10,14 @@
 using namespace Napi;
 
 Object Init(Env env, Object exports) {
-  PatchWrapper::init(exports);
-  MarkerIndexWrapper::init(exports);
-  TextBufferWrapper::init(exports);
-  TextWriter::init(exports);
-  TextReader::init(exports);
+  auto* data = new AddonData(env);
+  env.SetInstanceData(data);
+
+  PatchWrapper::init(env, exports);
+  MarkerIndexWrapper::init(env, exports);
+  TextBufferWrapper::init(env, exports);
+  TextWriter::init(env, exports);
+  TextReader::init(env, exports);
   TextBufferSnapshotWrapper::init(env);
   return exports;
 }

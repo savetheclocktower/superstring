@@ -3,10 +3,10 @@
 
 class PatchWrapper : public Napi::ObjectWrap<PatchWrapper> {
  public:
-  static void init(Napi::Object exports);
+  static void init(Napi::Env env, Napi::Object exports);
   static Napi::Value from_patch(Napi::Env, Patch &&);
 
-  PatchWrapper(const Napi::CallbackInfo &info);
+  explicit PatchWrapper(const Napi::CallbackInfo &info);
 
  private:
   static Napi::Value deserialize(const Napi::CallbackInfo &info);
@@ -29,5 +29,4 @@ class PatchWrapper : public Napi::ObjectWrap<PatchWrapper> {
   void rebalance(const Napi::CallbackInfo &info);
 
   Patch patch;
-  static Napi::FunctionReference constructor;
 };

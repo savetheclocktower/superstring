@@ -13,12 +13,12 @@ public:
 
 class TextBufferWrapper : public Napi::ObjectWrap<TextBufferWrapper> {
 public:
-  static void init(Napi::Object exports);
+  static void init(Napi::Env env, Napi::Object exports);
   TextBuffer text_buffer;
   std::unordered_set<Napi::AsyncWorker *> outstanding_workers;
   std::mutex outstanding_workers_mutex;
 
-  TextBufferWrapper(const Napi::CallbackInfo &info);
+  explicit TextBufferWrapper(const Napi::CallbackInfo &info);
 
 private:
   Napi::Value get_length(const Napi::CallbackInfo &info);
@@ -56,7 +56,6 @@ private:
   Napi::Value dot_graph(const Napi::CallbackInfo &info);
 
   void cancel_queued_workers();
-  static Napi::FunctionReference constructor;
 };
 
 #endif // SUPERSTRING_TEXT_BUFFER_WRAPPER_H

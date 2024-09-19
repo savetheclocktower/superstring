@@ -7,8 +7,8 @@
 
 class TextWriter : public Napi::ObjectWrap<TextWriter> {
 public:
-  static void init(Napi::Object exports);
-  TextWriter(const Napi::CallbackInfo &info);
+  static void init(Napi::Env env, Napi::Object exports);
+  explicit TextWriter(const Napi::CallbackInfo &info);
   std::u16string get_text();
 
 private:
@@ -18,7 +18,6 @@ private:
   std::unique_ptr<EncodingConversion> conversion;
   std::vector<char> leftover_bytes;
   std::u16string content;
-  static Napi::FunctionReference constructor;
 };
 
 #endif // SUPERSTRING_TEXT_WRITER_H

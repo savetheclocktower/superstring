@@ -2,6 +2,7 @@
 #include <sstream>
 #include <vector>
 
+#include "addon-data.h"
 #include "patch-wrapper.h"
 #include "point-wrapper.h"
 #include "string-conversion.h"
@@ -13,21 +14,21 @@ using std::u16string;
 
 static const char *InvalidSpliceMessage = "Patch does not apply";
 
-FunctionReference PatchWrapper::constructor;
-
 class ChangeWrapper : public ObjectWrap<ChangeWrapper> {
  public:
   static void init(Napi::Env env) {
+    auto *data = env.GetInstanceData<AddonData>();
     Function func = DefineClass(env, "Change", {
       InstanceMethod<&ChangeWrapper::to_string>("toString"),
     });
 
-    constructor.Reset(func, 1);
+    data->change_wrapper_constructor = Napi::Persistent(func);
   }
 
   static Napi::Value FromChange(Napi::Env env, Patch::Change change) {
+    auto *data = env.GetInstanceData<AddonData>();
     auto wrapper = External<Patch::Change>::New(env, &change);
-    Napi::Object js_change_wrapper = constructor.New({wrapper});
+    Napi::Object js_change_wrapper = data->change_wrapper_constructor.New({wrapper});
     return js_change_wrapper;
   }
 
@@ -57,14 +58,12 @@ class ChangeWrapper : public ObjectWrap<ChangeWrapper> {
   }
 
   Patch::Change change;
-  static FunctionReference constructor;
 };
 
-FunctionReference ChangeWrapper::constructor;
-
-void PatchWrapper::init(Object exports) {
-  auto env = exports.Env();
+void PatchWrapper::init(Napi::Env env, Object exports) {
+  auto *data = env.GetInstanceData<AddonData>();
   ChangeWrapper::init(env);
+
 
   Function func = DefineClass(env, "Patch", {
     StaticMethod<&PatchWrapper::deserialize>("deserialize"),
@@ -86,13 +85,15 @@ void PatchWrapper::init(Object exports) {
     InstanceMethod<&PatchWrapper::get_bounds>("getBounds"),
   });
 
-  constructor.Reset(func, 1);
+  data->patch_wrapper_constructor = Napi::Persistent(func);
+
   exports.Set("Patch", func);
 }
 
 Napi::Value PatchWrapper::from_patch(Napi::Env env, Patch &&patch) {
+  auto *data = env.GetInstanceData<AddonData>();
   auto wrapper = External<Patch>::New(env, &patch);
-  Napi::Object js_patch = constructor.New({wrapper});
+  Napi::Object js_patch = data->patch_wrapper_constructor.New({wrapper});
 
   return js_patch;
 }
@@ -284,6 +285,8 @@ Napi::Value PatchWrapper::deserialize(const CallbackInfo &info) {
 
 Napi::Value PatchWrapper::compose(const CallbackInfo &info) {
   Napi::Env env = info.Env();
+  auto *data = env.GetInstanceData<AddonData>();
+
   if (!info[0].IsArray()) {
     Error::New(env, "Compose requires an array of patches").ThrowAsJavaScriptException();
     return env.Undefined();
@@ -300,7 +303,7 @@ Napi::Value PatchWrapper::compose(const CallbackInfo &info) {
     }
 
     Object js_patch = js_patch_v.As<Object>();
-    if (!js_patch.InstanceOf(constructor.Value())) {
+    if (!js_patch.InstanceOf(data->patch_wrapper_constructor.Value())) {
       Error::New(env, "Patch.compose must be called with an array of patches").ThrowAsJavaScriptException();
       return env.Undefined();
     }

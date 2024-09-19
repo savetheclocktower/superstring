@@ -7,10 +7,10 @@
 
 class MarkerIndexWrapper : public Napi::ObjectWrap<MarkerIndexWrapper> {
 public:
-  static void init(Napi::Object exports);
+  static void init(Napi::Env env, Napi::Object exports);
   static MarkerIndex *from_js(Napi::Value);
 
-  MarkerIndexWrapper(const Napi::CallbackInfo &info);
+  explicit MarkerIndexWrapper(const Napi::CallbackInfo &info);
 
 private:
   Napi::Value generate_random_number(const Napi::CallbackInfo &info);
@@ -41,5 +41,4 @@ private:
   Napi::Value dump(const Napi::CallbackInfo &info);
 
   std::unique_ptr<MarkerIndex> marker_index;
-  static Napi::FunctionReference constructor;
 };

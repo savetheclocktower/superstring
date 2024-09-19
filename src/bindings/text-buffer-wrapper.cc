@@ -2,9 +2,11 @@
 #include <iomanip>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <iostream>
 
 #include "v8.h"
 #include "node.h"
+#include "addon-data.h"
 #include "text-buffer-wrapper.h"
 #include "number-conversion.h"
 #include "point-wrapper.h"
@@ -88,6 +90,7 @@ public:
 
   static const Regex *regex_from_js(const Napi::Value &value) {
     auto env = value.Env();
+    auto *data = env.GetInstanceData<AddonData>();
 
     String js_pattern;
     bool ignore_case = false;
@@ -130,7 +133,7 @@ public:
 
     // initialize RegexWrapper
     auto wrapper = External<Regex>::New(env, new Regex(move(regex)));
-    auto js_regex_wrapper = constructor.New({wrapper});
+    auto js_regex_wrapper = data->regex_constructor.New({wrapper});
 
     // cache Regex
     if (!js_regex.IsEmpty()) {
@@ -141,20 +144,20 @@ public:
   }
 
   static void init(Napi::Env env) {
+    auto *data = env.GetInstanceData<AddonData>();
+
     Function func = DefineClass(env, "RegexWrapper", {});
-    constructor.Reset(func, 1);
+    data->regex_constructor = Napi::Persistent(func);
   }
 
 private:
-  static FunctionReference constructor;
   std::unique_ptr<Regex> regex;
 };
-
-FunctionReference RegexWrapper::constructor;
 
 class SubsequenceMatchWrapper : public ObjectWrap<SubsequenceMatchWrapper> {
 public:
   static void init(Napi::Env env) {
+    auto *data = env.GetInstanceData<AddonData>();
     Function func = DefineClass(env, "SubsequenceMatch", {
       InstanceAccessor<&SubsequenceMatchWrapper::get_word>("word", static_cast<napi_property_attributes>(napi_enumerable | napi_configurable)),
       InstanceAccessor<&SubsequenceMatchWrapper::get_match_indices>("matchIndices", static_cast<napi_property_attributes>(napi_enumerable | napi_configurable)),
@@ -163,12 +166,13 @@ public:
       ),
     });
 
-    constructor.Reset(func, 1);
+    data->subsequence_match_constructor = Napi::Persistent(func);
   }
 
   static Napi::Value from_subsequence_match(Napi::Env env, SubsequenceMatch match) {
+    auto *data = env.GetInstanceData<AddonData>();
     auto wrapper = External<TextBuffer::SubsequenceMatch>::New(env, &match);
-    return constructor.New({wrapper});
+    return data->subsequence_match_constructor.New({wrapper});
   }
 
   SubsequenceMatchWrapper(const CallbackInfo &info): ObjectWrap<SubsequenceMatchWrapper>(info) {
@@ -207,11 +211,10 @@ public:
   }
 
   TextBuffer::SubsequenceMatch match;
-  static FunctionReference constructor;
 };
 
-void TextBufferWrapper::init(Object exports) {
-  auto env = exports.Env();
+void TextBufferWrapper::init(Napi::Env env, Object exports) {
+  auto *data = env.GetInstanceData<AddonData>();
 
   RegexWrapper::init(env);
   SubsequenceMatchWrapper::init(env);
@@ -252,11 +255,9 @@ void TextBufferWrapper::init(Object exports) {
     InstanceMethod<&TextBufferWrapper::get_snapshot>("getSnapshot", napi_default_method),
   });
 
-  constructor.Reset(func, 1);
+  data->text_buffer_wrapper_constructor = Napi::Persistent(func);
   exports.Set("TextBuffer", func);
 }
-FunctionReference SubsequenceMatchWrapper::constructor;
-FunctionReference TextBufferWrapper::constructor;
 
 TextBufferWrapper::TextBufferWrapper(const CallbackInfo &info): ObjectWrap<TextBufferWrapper>(info) {
   if (info.Length() > 0 && info[0].IsString()) {

@@ -1,17 +1,18 @@
+#include "addon-data.h"
 #include "text-buffer.h"
 #include "text-buffer-wrapper.h"
 #include "text-buffer-snapshot-wrapper.h"
 
 using namespace Napi;
 
-FunctionReference TextBufferSnapshotWrapper::constructor;
-
 void TextBufferSnapshotWrapper::init(Napi::Env env) {
+  auto *data = env.GetInstanceData<AddonData>();
+
   Napi::Function func = DefineClass(env, "Snapshot", {
     InstanceMethod<&TextBufferSnapshotWrapper::destroy>("destroy"),
   });
 
-  constructor.Reset(func, 1);
+  data->text_buffer_snapshot_wrapper_constructor = Napi::Persistent(func);
 }
 
 TextBufferSnapshotWrapper::TextBufferSnapshotWrapper(const CallbackInfo &info) : ObjectWrap<TextBufferSnapshotWrapper>(info) {
@@ -32,8 +33,9 @@ TextBufferSnapshotWrapper::~TextBufferSnapshotWrapper() {
 }
 
 Value TextBufferSnapshotWrapper::new_instance(Napi::Env env, Object js_buffer, TextBuffer::Snapshot *snapshot) {
+  auto *data = env.GetInstanceData<AddonData>();
   auto wrapper = External<TextBuffer::Snapshot>::New(env, snapshot);
-  return constructor.New({js_buffer, wrapper});
+  return data->text_buffer_snapshot_wrapper_constructor.New({js_buffer, wrapper});
 }
 
 void TextBufferSnapshotWrapper::destroy(const CallbackInfo &info) {

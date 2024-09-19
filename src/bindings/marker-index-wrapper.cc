@@ -2,6 +2,7 @@
 
 #include "v8.h"
 #include "napi.h"
+#include "addon-data.h"
 #include "marker-index-wrapper.h"
 #include "marker-index.h"
 #include "optional.h"
@@ -12,10 +13,8 @@
 using namespace Napi;
 using std::unordered_map;
 
-FunctionReference MarkerIndexWrapper::constructor;
-
-void MarkerIndexWrapper::init(Object exports) {
-  Napi::Env env = exports.Env();
+void MarkerIndexWrapper::init(Napi::Env env, Object exports) {
+  auto *data = env.GetInstanceData<AddonData>();
   Napi::Function func = DefineClass(env, "MarkerIndex", {
     InstanceMethod("generateRandomNumber", &MarkerIndexWrapper::generate_random_number),
     InstanceMethod("insert", &MarkerIndexWrapper::insert),
@@ -38,7 +37,8 @@ void MarkerIndexWrapper::init(Object exports) {
     InstanceMethod("dump", &MarkerIndexWrapper::dump),
   });
 
-  constructor.Reset(func, 1);
+  data->marker_index_wrapper_constructor = Napi::Persistent(func);
+
   exports.Set("MarkerIndex", func);
 }
 

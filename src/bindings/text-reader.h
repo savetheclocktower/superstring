@@ -8,8 +8,8 @@
 
 class TextReader : public Napi::ObjectWrap<TextReader> {
 public:
-  static void init(Napi::Object exports);
-  TextReader(const Napi::CallbackInfo &info);
+  static void init(Napi::Env env, Napi::Object exports);
+  explicit TextReader(const Napi::CallbackInfo &info);
   ~TextReader();
 
 private:
@@ -23,7 +23,6 @@ private:
   size_t slice_index;
   size_t text_offset;
   std::unique_ptr<EncodingConversion> conversion;
-  static Napi::FunctionReference constructor;
 };
 
 #endif // SUPERSTRING_TEXT_READER_H
