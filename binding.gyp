@@ -31,9 +31,6 @@
                         {
                             'postbuild_name': 'Adjust vendored libiconv install name',
                             'action': [
-                                  # "bash",
-                                  # "-c",
-                                  # 'echo "Before fix:"; otool -L "<(PRODUCT_DIR)/tests"; install_name_tool -change "libiconv.2.dylib" "@executable_path/../../ext/lib/libiconv.2.dylib" "<(PRODUCT_DIR)/tests"; echo "After fix:"; otool -L "<(PRODUCT_DIR)/tests"'
                                 'install_name_tool',
                                 "-change",
                                 "libiconv.2.dylib",
@@ -199,14 +196,11 @@
                             {
                                 'postbuild_name': 'Adjust vendored libiconv install name',
                                 'action': [
-                                  "bash",
-                                  "-c",
-                                  'echo "Before fix:"; otool -L "<(PRODUCT_DIR)/tests"; install_name_tool -change "libiconv.2.dylib" "@executable_path/../../ext/lib/libiconv.2.dylib" "<(PRODUCT_DIR)/tests"; echo "After fix:"; otool -L "<(PRODUCT_DIR)/tests"'
-                                    # 'install_name_tool',
-                                    # "-change",
-                                    # "libiconv.2.dylib",
-                                    # "@loader_path/../../ext/lib/libiconv.2.dylib",
-                                    # "<(PRODUCT_DIR)/superstring.node"
+                                  'install_name_tool',
+                                  "-change",
+                                  "libiconv.2.dylib",
+                                  "@executable_path/../../ext/lib/libiconv.2.dylib",
+                                  "<(PRODUCT_DIR)/tests"
                                 ]
 
                                 # NOTE: This version of the post-build action
