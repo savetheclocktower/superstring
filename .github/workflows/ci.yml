@@ -76,7 +76,6 @@ jobs:
       - name: Install dependencies (Unix-likes)
         if: ${{ runner.os != 'Windows' }}
         run: |
-          source CI_venv/bin/activate
           npm install
 
       - name: Install dependencies (Windows)
