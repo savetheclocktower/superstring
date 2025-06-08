@@ -183,6 +183,9 @@
                         "defines+": ["CATCH_CONFIG_CPP17_STRING_VIEW"]
                     }],
                     ['OS=="mac"', {
+                        'dependencies+': [
+                            'build_libiconv'
+                        ],
                         'cflags': [
                             '-mmacosx-version-min=10.8'
                         ],
