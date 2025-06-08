@@ -105,7 +105,8 @@
     ],
 
     "variables": {
-        "tests": 0
+        "tests": 0,
+        "node_version_major%": "<!(node -p \"process.versions.node.split('.')[0]\")"
     },
 
     "conditions": [
